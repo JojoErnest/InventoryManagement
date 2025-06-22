@@ -1,0 +1,26 @@
+# =====================
+# Node.js (React) client
+# =====================
+client/node_modules
+client/build
+client/.env
+
+# =====================
+# .NET Core (server)
+# =====================
+server/bin/
+server/obj/
+server/appsettings.Development.json
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignore global settings
+.vscode/
+.env
+*.log
+
+# OS / editor files
+.DS_Store
+Thumbs.db
