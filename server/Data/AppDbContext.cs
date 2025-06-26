@@ -7,6 +7,8 @@ namespace server.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        public DbSet<ProductChangeLog> ProductChangeLogs { get; set; }
+
         public DbSet<Product> Products { get; set; }
     }
 }
