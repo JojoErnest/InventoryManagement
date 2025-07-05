@@ -10,6 +10,8 @@ namespace server.Data
         public DbSet<ProductChangeLog> ProductChangeLogs { get; set; }
 
         public DbSet<Product> Products { get; set; }
+
+        public DbSet<User> Users { get; set; }
     }
 }
 

@@ -1,10 +1,22 @@
 using server.Data;
-using Microsoft.EntityFrameworkCore;
+using server.Models;
+using server.Services;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Tambahkan ini supaya controller bisa digunakan
-builder.Services.AddControllers(); // <<< WAJIB
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevCors", p =>
+        p.WithOrigins("http://localhost:3000")   // localhost React app
+         .AllowAnyHeader()
+         .AllowAnyMethod());
+});
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddControllers();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -15,6 +27,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+app.UseCors("DevCors");
 
 // Swagger UI saat development
 if (app.Environment.IsDevelopment())
