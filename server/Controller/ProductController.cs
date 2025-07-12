@@ -28,9 +28,32 @@ namespace server.Controllers
 
         // POST api/product
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        [Consumes("multipart/form-data")] // untuk menerima IFormFile
+        public async Task<ActionResult<Product>> PostProduct([FromForm] ProductCreateDto dto, IFormFile image)
         {
-            product.CreatedAt = product.UpdatedAt = DateTime.UtcNow;
+            // product.CreatedAt = product.UpdatedAt = DateTime.UtcNow;
+            var username = dto.CreatedBy ?? "Anonymous";
+            var product = new Product
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                QuantityInStock = dto.QuantityInStock,
+                Category = dto.Category,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                CreatedBy = username
+            };
+            if (image != null)
+            {
+                var filePath = Path.Combine("images", image.FileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                product.ImagePath = $"images/{image.FileName}";
+            }
 
             _context.Products.Add(product);
 
@@ -38,9 +61,10 @@ namespace server.Controllers
             _context.ProductChangeLogs.Add(new ProductChangeLog
             {
                 ProductId = 0,                      // sementara 0, di-update setelah SaveChanges
-                Action    = "Add",
-                NewData   = JsonSerializer.Serialize(product),
-                Timestamp   = DateTime.UtcNow
+                Action = "Add",
+                NewData = JsonSerializer.Serialize(product),
+                Timestamp = DateTime.UtcNow,
+                ActionsBy = username
             });
 
             await _context.SaveChangesAsync();

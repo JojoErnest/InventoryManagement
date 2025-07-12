@@ -1,6 +1,6 @@
 namespace server.Models
 {
-    public class ProductChangeLog  
+    public class ProductChangeLog
     // Model untuk menyimpan log perubahan produk
     {
         public int Id { get; set; }
@@ -9,5 +9,6 @@ namespace server.Models
         public string? OldData { get; set; }         // JSON string (opsional)
         public string? NewData { get; set; }         // JSON string (opsional)
         public DateTime Timestamp { get; set; }
+        public string ActionsBy { get; set; } // siapa yang melakukan perubahan
     }
 }

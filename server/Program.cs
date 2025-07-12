@@ -4,6 +4,7 @@ using server.Services;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -38,7 +39,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles(); // untuk akses file statis seperti gambar
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "images")),
+    RequestPath = "/images" // akses gambar lewat /images
+});
 app.UseAuthorization();
 
 // ✅ Tambahkan ini supaya route controller seperti /api/product bisa dipetakan

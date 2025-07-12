@@ -8,6 +8,8 @@ namespace server.Models
         public decimal Price { get; set; }
         public int QuantityInStock { get; set; }
         public string Category { get; set; }
+        public string? ImagePath { get; set; } 
+        public string CreatedBy { get; set; } 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

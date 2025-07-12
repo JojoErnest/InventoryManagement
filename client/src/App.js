@@ -1,8 +1,21 @@
 import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage"; // atau './pages/LoginPage' tergantung struktur folder
+import HomePage from "./Pages/HomePage"; // atau './pages/HomePage' tergantung struktur folder
+
+function AppWrapper(){
+  const [user, setUser] = useState(localStorage.getItem("username"));
+
+  return (
+    <Router>
+      <App user={user} setUser={setUser} />
+    </Router>
+  )
+}
 
 function App() {
   const API = "http://localhost:5243";
+  const navigate = useNavigate();
 
   const [user, setUser] = useState(localStorage.getItem("username"));
   
@@ -20,9 +33,9 @@ function App() {
       return;
     }
 
-    // kalau OK
       localStorage.setItem("username", username);
       setUser(username);
+      navigate("/home"); 
     } catch (err) {
       console.error(err);
       alert("Server error while login");
@@ -30,10 +43,11 @@ function App() {
   };
 
   const handleLogout = () => {
-  localStorage.removeItem("username"); // hapus sesi
-  setUser(null);                       // kembali ke halaman login
+  localStorage.removeItem("username"); 
+  setUser(null);
+  navigate("/"); 
+  alert("You have logged out successfully.");
   };
-
    const handleRegister = async (username, password) => {
     try {
       const response = await fetch(`${API}/api/auth/register`, {
@@ -57,36 +71,10 @@ function App() {
   };
 
   return (
-   <>
-    {!user ? (
-      <LoginPage onLogin={handleLogin} onRegister={handleRegister} />
-    ) : (
-      <div style={{ position: "relative", minHeight: "100vh" }}>
-        <button
-          onClick={handleLogout}
-          style={{
-            position: "absolute",
-            top: "1rem",
-            right: "1rem",
-            padding: "0.5rem 1rem",
-            border: "none",
-            borderRadius: "0.5rem",
-            backgroundColor: "#ef4444",
-            color: "#fff",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Logout
-        </button>
-
-        {/* Isi halaman setelah login */}
-        <div className="p-4" style={{ textAlign: "center", marginTop: "4rem" }}>
-          Welcome, {user}!
-        </div>
-      </div>
-    )}
-  </>
+    <Routes>
+      <Route path="/" element={<LoginPage onLogin={handleLogin} onRegister={handleRegister} />} />
+      <Route path="/home" element={<HomePage user={user} onLogout={handleLogout} />} />
+    </Routes>
   );
 }
 
