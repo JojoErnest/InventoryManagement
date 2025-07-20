@@ -24,8 +24,16 @@ namespace server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var ok = await _auth.ValidateAsync(dto.Username, dto.Password);
-            return ok ? Ok("Login success") : Unauthorized("Invalid credentials");
+            var user = await _auth.ValidateAsync(dto.Username, dto.Password);
+            if (user is null) return Unauthorized("Invalid username or password");
+
+            return Ok(new
+            {
+                user.Id,
+                user.Username,
+                Role = (int)user.Role
+            });
+
         }
     }
 }

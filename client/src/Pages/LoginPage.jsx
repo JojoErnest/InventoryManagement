@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../CSS/LoginPage.css";        
+import { useNavigate } from "react-router-dom";
 
 function LoginPage({ onLogin, onRegister }) {
   const [username, setUsername] = useState("");
@@ -7,11 +8,14 @@ function LoginPage({ onLogin, onRegister }) {
   const [showModal, setShowModal]   = useState(false);
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return; 
-    onLogin(username, password);
+    // onLogin(username, password);
+    const user = await onLogin(username, password);
+    if (user) navigate("/home");
   };
 
   const openRegisterModal = () => {

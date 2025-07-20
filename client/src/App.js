@@ -1,71 +1,61 @@
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
-import LoginPage from "./Pages/LoginPage"; // atau './pages/LoginPage' tergantung struktur folder
-import HomePage from "./Pages/HomePage"; // atau './pages/HomePage' tergantung struktur folder
+import { Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./Pages/LoginPage";
+import HomePage from "./Pages/HomePage";
 
-function AppWrapper(){
-  const [user, setUser] = useState(localStorage.getItem("username"));
-
-  return (
-    <Router>
-      <App user={user} setUser={setUser} />
-    </Router>
-  )
-}
-
-function App() {
+function App({ user, setUser }) {
   const API = "http://localhost:5243";
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const [user, setUser] = useState(localStorage.getItem("username"));
-  
   const handleLogin = async (username, password) => {
-     try {
-    const res = await fetch(`${API}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const res = await fetch(`${API}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (!res.ok) {
-      const errMsg = await res.text();
-      alert("Login failed: " + errMsg);
-      return;
-    }
+      if (!res.ok) {
+        const errMsg = await res.text();
+        alert("Login failed: " + errMsg);
+        return null;
+      }
 
-      localStorage.setItem("username", username);
-      setUser(username);
-      navigate("/home"); 
+      const userData = await res.json();
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+      // navigate("/home");
+      return userData;
     } catch (err) {
       console.error(err);
+      // console.log("user", user);
+      // console.log("username", username);
       alert("Server error while login");
+      return null;
     }
   };
 
   const handleLogout = () => {
-  localStorage.removeItem("username"); 
-  setUser(null);
-  navigate("/"); 
-  alert("You have logged out successfully.");
+    localStorage.removeItem("user");
+    setUser(null);
+    // navigate("/");
   };
-   const handleRegister = async (username, password) => {
+
+  const handleRegister = async (username, password) => {
     try {
-      const response = await fetch(`${API}/api/auth/register`, {
+      const res = await fetch(`${API}/api/auth/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
-      if (response.ok) {
+      if (res.ok) {
         alert("Register success! Now you can login.");
       } else {
-        const err = await response.text();
+        const err = await res.text();
         alert("Register failed: " + err);
       }
     } catch (error) {
-      console.error("Register error:", error);
+      console.error(error);
       alert("Server error during registration.");
     }
   };
@@ -73,7 +63,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage onLogin={handleLogin} onRegister={handleRegister} />} />
-      <Route path="/home" element={<HomePage user={user} onLogout={handleLogout} />} />
+      <Route path="/home" element={user ? (<HomePage user={user} onLogout={handleLogout} />) : (<Navigate to="/" replace />)}/>
     </Routes>
   );
 }

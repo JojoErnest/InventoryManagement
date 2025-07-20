@@ -90,7 +90,7 @@ namespace server.Controllers
             if (existing is null) return NotFound();
 
             // update field
-            product.CreatedAt = existing.CreatedAt; 
+            product.CreatedAt = existing.CreatedAt;
             product.UpdatedAt = DateTime.UtcNow;
 
             _context.Entry(product).State = EntityState.Modified;
@@ -99,10 +99,10 @@ namespace server.Controllers
             _context.ProductChangeLogs.Add(new ProductChangeLog
             {
                 ProductId = id,
-                Action    = "Update",
-                OldData   = JsonSerializer.Serialize(existing),
-                NewData   = JsonSerializer.Serialize(product),
-                Timestamp   = DateTime.UtcNow
+                Action = "Update",
+                OldData = JsonSerializer.Serialize(existing),
+                NewData = JsonSerializer.Serialize(product),
+                Timestamp = DateTime.UtcNow
             });
             // ----  end log  ----
 
@@ -112,7 +112,7 @@ namespace server.Controllers
 
         // DELETE api/product/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(int id, [FromQuery] string? deletedBy)
         {
             var product = await _context.Products.FindAsync(id);
             if (product is null) return NotFound();
@@ -123,15 +123,45 @@ namespace server.Controllers
             _context.ProductChangeLogs.Add(new ProductChangeLog
             {
                 ProductId = id,
-                Action    = "Delete",
-                OldData   = JsonSerializer.Serialize(product),
-                NewData   = null,
-                Timestamp   = DateTime.UtcNow
+                Action = "Delete",
+                OldData = JsonSerializer.Serialize(product),
+                NewData = null,
+                Timestamp = DateTime.UtcNow,
+                ActionsBy = deletedBy
             });
             // ----  end log  ----
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        
+        // PATCH api/product/stock/5
+        [HttpPatch("stock/{id}")]
+        public async Task<IActionResult> UpdateStock(int id, [FromBody] StockUpdateDto dto)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product is null) return NotFound();
+
+            var oldData = JsonSerializer.Serialize(product);
+
+            product.QuantityInStock += dto.Delta;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            _context.Entry(product).State = EntityState.Modified;
+
+            _context.ProductChangeLogs.Add(new ProductChangeLog
+            {
+                ProductId = id,
+                Action = dto.Delta > 0 ? "IncreaseStock" : "DecreaseStock",
+                OldData = oldData,
+                NewData = JsonSerializer.Serialize(product),
+                Timestamp = DateTime.UtcNow,
+                ActionsBy = dto.UpdatedBy ?? "Anonymous"
+            });
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
     }
 }

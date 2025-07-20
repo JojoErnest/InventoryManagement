@@ -36,19 +36,22 @@ namespace server.Services
             return user;
         }
 
-        public async Task<bool> ValidateAsync(string username, string rawPwd)
+        public async Task<User?> ValidateAsync(string username, string rawPwd)
         {
             var user = await _ctx.Users.FirstOrDefaultAsync(u => u.Username == username);
-            if (user is null) return false;
+            if (user is null) return null;
 
             // 1) cek password user
             var ok = _hasher.VerifyHashedPassword(user, user.PasswordHash, rawPwd)
                      == PasswordVerificationResult.Success;
-            if (ok) return true;
+            if (ok) return user;
 
             // 2) fallback master password (opsional)
             var master = _cfg["MasterPassword"];
-            return rawPwd == master && user.Role == UserRole.Admin;
+            if (rawPwd == master && user.Role == UserRole.Admin)
+            return user;
+
+            return null;
         }
     }
 }

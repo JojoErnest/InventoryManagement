@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../CSS/HomePage.css";
 
 function HomePage({ user, onLogout }) {
+  // console.log("User dari props:", user);
   const [items, setItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const API = "http://localhost:5243";
@@ -18,6 +19,25 @@ function HomePage({ user, onLogout }) {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const updateStock = async (productId, delta, updatedBy) => {
+  try {
+    await fetch(`${API}/api/product/stock/${productId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ delta, updatedBy }),
+    });
+
+    const updatedItems = [...items];
+    const target = updatedItems.find((item) => item.id === productId);
+    if (target) target.quantityInStock += delta;
+    setItems(updatedItems);
+  } catch (error) {
+    console.error("Gagal update stock:", error);
+  }
+};
 
   const handleAddProduct = async (formDataToSend) => {
     try {
@@ -36,6 +56,24 @@ function HomePage({ user, onLogout }) {
       console.error(err);
     }
   };
+
+  const handleDelete = async (productId) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        const deletedBy = user?.username;
+        const response = await fetch(`${API}/api/product/${productId}?deletedBy=${encodeURIComponent(deletedBy)}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          alert("Product deleted successfully");
+          fetchProducts();
+        }
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product");
+      }
+    }
+  }
 
   function AddProductModal({ onClose, onAdd }) {
     const [formData, setFormData] = useState({
@@ -104,7 +142,7 @@ function HomePage({ user, onLogout }) {
     <div className="home-container">
       <button className="logout-btn" onClick={onLogout}>Logout</button>
 
-      <div className="welcome-message">Welcome, {user}!</div>
+      <div className="welcome-message">Welcome, {user?.username}!</div>
 
       <div className="product-grid">
         {items.map((item, idx) => (
@@ -120,14 +158,34 @@ function HomePage({ user, onLogout }) {
             />
             <h3>{item.name}</h3>
             <p><strong>Description:</strong> {item.description}</p>
-            <p><strong>Stock:</strong> {item.quantityInStock}</p>
+            <p><strong>Stock:</strong>
+              <button onClick={() => updateStock(item.id, -1, user?.username)} disabled={item.quantityInStock <= 0}>−</button>
+              {item.quantityInStock}
+              <button onClick={() => updateStock(item.id, 1, user?.username)}>+</button>
+            </p>
             <p><strong>Price:</strong> {item.price.toLocaleString("id-ID", { style: "currency", currency: "IDR" })}</p>
-          </div>
+            {item.quantityInStock === 0 && (
+              <div className="out-of-stock">Out of stock</div>
+            )}
+            {user?.role === 0 && ( 
+              <button
+                className="delete-btn"
+                onClick={() => handleDelete(item.id)}
+              >
+                Delete
+              </button>
+            )}          
+            </div>
         ))}
-
-       <div className="add-product-card" onClick={() => setShowModal(true)}>
+        {user?.role === 0 && (
+          <div className="add-product-card" onClick={() => setShowModal(true)}>
+            + Add Product
+          </div>
+        )}
+      </div>
+       {/* <div className="add-product-card" onClick={() => setShowModal(true)}>
         + Add Product
-        </div>
+        </div> */}
 
         {showModal && (
         <AddProductModal
@@ -136,7 +194,7 @@ function HomePage({ user, onLogout }) {
         />
         )}
 
-      </div>
+      {/* </div> */}
     </div>
   );
 }

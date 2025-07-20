@@ -114,3 +114,26 @@
   border: none;
   border-radius: 0.5rem;
 }
+
+.out-of-stock {
+  color: red;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.delete-button {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background-color: #dc2626;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.delete-button:hover {
+  background-color: #b91c1c;
+}
