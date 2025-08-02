@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using server.Dtos;
 using server.Models;
 using server.Services;
+// using System.Text.Json;
 
 namespace server.Controllers
 {
@@ -16,9 +17,21 @@ namespace server.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            var user = await _auth.RegisterAsync(dto.Username, dto.Password, dto.Role);
+            var user = await _auth.RegisterAsync(
+                dto
+            );
+
             if (user is null) return Conflict("Username already exists");
-            return Ok(new { user.Id, user.Username, user.Role });
+
+            return Ok(new
+            {
+                user.Id,
+                user.Username,
+                user.Role,
+                user.FullName,
+                user.Email,
+                user.Phone
+            });
         }
 
         [HttpPost("login")]

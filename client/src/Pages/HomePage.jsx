@@ -1,12 +1,29 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../CSS/HomePage.css";
+import RegisterModal from "../components/RegisterModal";
 
-function HomePage({ user, onLogout }) {
-  // console.log("User dari props:", user);
+function HomePage({ user, onLogout, onRegister }) {
+
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [regUsername, setRegUsername] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regFullName, setRegFullName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [regRole, setRegRole] = useState(2); // default User
+
+
   const [items, setItems] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const navigate = useNavigate();
   const API = "http://localhost:5243";
 
+  const handleHome = () => {
+  navigate("/home"); 
+};
+
+// export default Homepage;
   const fetchProducts = () => {
     fetch(`${API}/api/product`)
       .then((res) => res.json())
@@ -75,6 +92,39 @@ function HomePage({ user, onLogout }) {
     }
   }
 
+      const openRegisterModal = () => {
+      setShowRegisterModal(true)
+      setRegUsername("");
+      setRegPassword("");
+    };
+
+    const handleRegisterSubmit = (e) => {
+      e.preventDefault();
+      if (
+        !regUsername.trim() ||
+        !regPassword.trim() ||
+        !regFullName.trim() ||
+        !regEmail.trim() ||
+        !regPhone.trim()
+      ) {
+        alert("Please fill in all fields");
+        return;
+      }
+
+      onRegister({
+        username: regUsername,
+        password: regPassword,
+        fullName: regFullName,
+        email: regEmail,
+        phone: regPhone,
+        role: regRole,
+        actionsBy: user?.username
+      });
+
+      setShowRegisterModal(false);
+    };
+
+
   function AddProductModal({ onClose, onAdd }) {
     const [formData, setFormData] = useState({
       name: "",
@@ -139,63 +189,97 @@ function HomePage({ user, onLogout }) {
   }
 
   return (
-    <div className="home-container">
-      <button className="logout-btn" onClick={onLogout}>Logout</button>
-
-      <div className="welcome-message">Welcome, {user?.username}!</div>
-
-      <div className="product-grid">
-        {items.map((item, idx) => (
-          <div className="product-card" key={idx}>
-            <img
-              src={`${API}/${item.imagePath ? item.imagePath : "images/image.png"}`}
-              alt={item.name}
-              className="product-image"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `${API}/images/image.png`;
-              }}
-            />
-            <h3>{item.name}</h3>
-            <p><strong>Description:</strong> {item.description}</p>
-            <p><strong>Stock:</strong>
-              <button onClick={() => updateStock(item.id, -1, user?.username)} disabled={item.quantityInStock <= 0}>−</button>
-              {item.quantityInStock}
-              <button onClick={() => updateStock(item.id, 1, user?.username)}>+</button>
-            </p>
-            <p><strong>Price:</strong> {item.price.toLocaleString("id-ID", { style: "currency", currency: "IDR" })}</p>
-            {item.quantityInStock === 0 && (
-              <div className="out-of-stock">Out of stock</div>
+        <div className="homepage-layout">
+          <aside className="sidebar">
+            <button onClick={handleHome}>🏠 Home</button>
+            
+            {user?.role === 0 && (
+              <>
+              <button onClick={openRegisterModal}>➕ Register</button>
+              <button onClick={() => navigate("/users")}>👥 User List</button>
+              </>
             )}
-            {user?.role === 0 && ( 
-              <button
-                className="delete-btn"
-                onClick={() => handleDelete(item.id)}
-              >
-                Delete
-              </button>
-            )}          
+            
+            <button onClick={onLogout}>🚪 Logout</button>
+          </aside>
+
+          <main className="main-content">
+            <div className="home-container">
+
+                    <div className="welcome-message">Welcome, {user?.username}!</div>
+
+              <div className="product-grid">
+                {items.map((item, idx) => (
+                  <div className="product-card" key={idx}>
+                    <img
+                      src={`${API}/${item.imagePath ? item.imagePath : "images/image.png"}`}
+                      alt={item.name}
+                      className="product-image"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `${API}/images/image.png`;
+                      }}
+                    />
+                    <h3>{item.name}</h3>
+                    <p><strong>Description:</strong> {item.description}</p>
+                    <p><strong>Stock:</strong>
+                      <button onClick={() => updateStock(item.id, -1, user?.username)} disabled={item.quantityInStock <= 0}>−</button>
+                      {item.quantityInStock}
+                      <button onClick={() => updateStock(item.id, 1, user?.username)}>+</button>
+                    </p>
+                    <p><strong>Price:</strong> {item.price.toLocaleString("id-ID", { style: "currency", currency: "IDR" })}</p>
+                    {item.quantityInStock === 0 && (
+                      <div className="out-of-stock">Out of stock</div>
+                    )}
+                    {user?.role < 2  && ( 
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        Delete
+                      </button>
+                    )}          
+                    </div>
+                ))}
+                {user?.role < 2 && (
+                  <div className="add-product-card" onClick={() => setShowAddProductModal(true)}>
+                    + Add Product
+                  </div>
+                )}
+              </div>
+              {/* <div className="add-product-card" onClick={() => setShowModal(true)}>
+                + Add Product
+                </div> */}
+
+                {showAddProductModal && (
+                <AddProductModal
+                    onClose={() => setShowAddProductModal(false)}
+                    onAdd={handleAddProduct}
+                />
+                )}
+
+              {/* </div> */}
+             {showRegisterModal && (
+              <RegisterModal
+                username={regUsername}
+                setUsername={setRegUsername}
+                password={regPassword}
+                setPassword={setRegPassword}
+                fullName={regFullName}
+                setFullName={setRegFullName}
+                email={regEmail}
+                setEmail={setRegEmail}
+                phone={regPhone}
+                setPhone={setRegPhone}
+                role={regRole}
+                setRole={setRegRole}
+                onClose={() => setShowRegisterModal(false)}
+                onSubmit={handleRegisterSubmit}
+              />
+            )}
             </div>
-        ))}
-        {user?.role === 0 && (
-          <div className="add-product-card" onClick={() => setShowModal(true)}>
-            + Add Product
-          </div>
-        )}
-      </div>
-       {/* <div className="add-product-card" onClick={() => setShowModal(true)}>
-        + Add Product
-        </div> */}
-
-        {showModal && (
-        <AddProductModal
-            onClose={() => setShowModal(false)}
-            onAdd={handleAddProduct}
-        />
-        )}
-
-      {/* </div> */}
-    </div>
+          </main>
+        </div>
   );
 }
 

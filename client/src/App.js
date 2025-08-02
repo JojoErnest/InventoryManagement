@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import HomePage from "./Pages/HomePage";
+import UserListPage from "./Pages/UserListPage";
+import { act } from "react";
 
 function App({ user, setUser }) {
   const API = "http://localhost:5243";
@@ -40,30 +42,48 @@ function App({ user, setUser }) {
     // navigate("/");
   };
 
-  const handleRegister = async (username, password) => {
-    try {
-      const res = await fetch(`${API}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+const handleRegister = async ({ username, password, role, fullName, email, phone }) => {
+  try {
+    const res = await fetch(`${API}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username,
+        password,
+        role,
+        fullName,
+        email,
+        phone,
+        actionsBy: user?.username 
+      }),
+    });
 
-      if (res.ok) {
-        alert("Register success! Now you can login.");
-      } else {
-        const err = await res.text();
-        alert("Register failed: " + err);
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Server error during registration.");
+    if (res.ok) {
+      alert("Register success! Now you can login.");
+    } else {
+      const err = await res.text();
+      alert("Register failed: " + err);
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Server error during registration.");
+  }
+};
+
 
   return (
     <Routes>
-      <Route path="/" element={<LoginPage onLogin={handleLogin} onRegister={handleRegister} />} />
-      <Route path="/home" element={user ? (<HomePage user={user} onLogout={handleLogout} />) : (<Navigate to="/" replace />)}/>
+      <Route path="/" element={<LoginPage onLogin={handleLogin}/>} />
+      {/* <Route path="/home" element={<HomePage onRegister={handleRegister}/>} /> */}
+      {/* <Route path="/users" element={<UserListPage user={user}  onLogout={handleLogout} onRegister={handleRegister}/>} /> */}
+      <Route path="/users" element={
+        user ? (
+          <UserListPage user={user} onLogout={handleLogout} onRegister={handleRegister}/>
+        ) : (
+          <Navigate to="/" replace />
+        )
+      } />
+      <Route path="/home" element={user ? (<HomePage user={user} onLogout={handleLogout} onRegister={handleRegister}/>) : (<Navigate to="/" replace />)}/>
     </Routes>
   );
 }

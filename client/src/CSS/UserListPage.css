@@ -1,0 +1,81 @@
+.sidebar {
+  width: 200px;
+  background-color: #1e1e2f;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.sidebar button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  text-align: left;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar button:hover {
+  background-color: #333355;
+}
+
+.homepage-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f4f6f8;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+/* Table Styles */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-table th,
+.user-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.even-row {
+  background-color: #ffffff;
+}
+
+.odd-row {
+  background-color: #f0f4f8;
+}
+
+.admin-role {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.user-role {
+  font-weight: bold;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}

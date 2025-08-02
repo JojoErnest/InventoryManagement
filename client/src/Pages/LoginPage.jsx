@@ -52,20 +52,20 @@ function LoginPage({ onLogin, onRegister }) {
             <button className="btn-primary" type="submit">
               Login
             </button>
-            <button
+            {/* <button
               className="btn-secondary"
               type="button"
               onClick={openRegisterModal}
               style={{ marginTop: "10px" }}
             >
               Register
-            </button>
+            </button> */}
           </form>
         </div>
       </div>
 
       {/* ----- MODAL REGISTER ----- */}
-      {showModal && (
+      {/* {showModal && (
         <div className="modal-backdrop">
           <div className="modal">
             <h3>Register</h3>
@@ -96,7 +96,7 @@ function LoginPage({ onLogin, onRegister }) {
             </form>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }

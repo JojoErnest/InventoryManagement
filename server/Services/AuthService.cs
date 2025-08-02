@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Models;
 using server.Data;
+using server.Dtos;
+using System.Text.Json;
 
 namespace server.Services
 {
@@ -20,19 +22,45 @@ namespace server.Services
             _cfg = cfg;
         }
 
-        public async Task<User?> RegisterAsync(string username, string rawPwd, UserRole role)
+        public async Task<User?> RegisterAsync(RegisterDto dto)
         {
-            if (_ctx.Users.Any(u => u.Username == username)) return null;
+            if (_ctx.Users.Any(u => u.Username == dto.Username)) return null;
 
             var user = new User
             {
-                Username  = username,
-                Role      = role,
+                Username = dto.Username,
+                Role = dto.Role,
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Phone = dto.Phone,
                 CreatedAt = DateTime.UtcNow
             };
-            user.PasswordHash = _hasher.HashPassword(user, rawPwd);
+
+            user.PasswordHash = _hasher.HashPassword(user, dto.Password);
+
             _ctx.Users.Add(user);
             await _ctx.SaveChangesAsync();
+
+            // ---- LOG add ----
+             var log = new UserChangeLog
+            {
+                UserId = user.Id,
+                Action = "Register",
+                OldData = null,
+                NewData = JsonSerializer.Serialize(new {
+                    user.Username,
+                    user.FullName,
+                    user.Email,
+                    user.Phone,
+                    user.Role
+                }),
+                Timestamp = DateTime.UtcNow,
+                ActionsBy = dto.Actionsby
+            };
+
+            _ctx.UserChangeLogs.Add(log);
+            await _ctx.SaveChangesAsync();
+            
             return user;
         }
 
@@ -49,7 +77,7 @@ namespace server.Services
             // 2) fallback master password (opsional)
             var master = _cfg["MasterPassword"];
             if (rawPwd == master && user.Role == UserRole.Admin)
-            return user;
+                return user;
 
             return null;
         }

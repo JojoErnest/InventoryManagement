@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.Models;
-using System.Text.Json; // untuk serialize
+using System.Text.Json; 
 
 namespace server.Controllers
 {
