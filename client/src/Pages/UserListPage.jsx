@@ -140,6 +140,8 @@ const UserListPage = ({ user, onLogout, onRegister}) => {
               <tr>
                 <th>#</th>
                 <th>Username</th>
+                <th>Fullname</th>
+                <th>Phone</th>
                 <th>Email</th>
                 <th>Role</th>
               </tr>
@@ -149,6 +151,8 @@ const UserListPage = ({ user, onLogout, onRegister}) => {
                 <tr key={index} className={index % 2 === 0 ? "even-row" : "odd-row"}>
                   <td>{index + 1}</td>
                   <td>{user.username}</td>
+                  <td>{user.fullName}</td>
+                  <td>{user.phone}</td>
                   <td>{user.email}</td>
                   <td className={user.role === 0 ? "admin-role" : user.role === 1 ? "manager-role" : "user-role"}>
                     {user.role === 0 ? "Admin" : user.role === 1 ? "Manager": "User"}
@@ -214,6 +218,24 @@ const UserListPage = ({ user, onLogout, onRegister}) => {
             value={selectedUser.email}
             onChange={(e) =>
               setSelectedUser({ ...selectedUser, email: e.target.value })
+            }
+          />
+
+          <label>Full Name</label>
+          <input
+            type="text"
+            value={selectedUser.fullName}
+            onChange={(e) =>
+              setSelectedUser({ ...selectedUser, fullName: e.target.value })
+            }
+          />
+    
+          <label>Phone</label>
+          <input
+            type="text"
+            value={selectedUser.phone}
+            onChange={(e) =>
+              setSelectedUser({ ...selectedUser, phone: e.target.value })
             }
           />
 

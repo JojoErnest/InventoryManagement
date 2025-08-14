@@ -22,6 +22,8 @@ namespace server.Controllers
                 {
                     u.Id,
                     u.Username,
+                    u.FullName,
+                    u.Phone,
                     u.Role,
                     u.CreatedAt,
                     u.Email
@@ -41,6 +43,8 @@ namespace server.Controllers
                 {
                     u.Id,
                     u.Username,
+                    u.FullName,
+                    u.Phone,
                     u.Role,
                     u.CreatedAt,
                     u.Email

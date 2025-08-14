@@ -100,3 +100,35 @@ h1 {
   justify-content: flex-end;
   gap: 10px;
 }
+
+
+.btn-edit {
+  background-color: #4CAF50; 
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  margin-right: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-edit:hover {
+  background-color: #45a049; 
+}
+
+.btn-delete {
+  background-color: #f44336; 
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-delete:hover {
+  background-color: #da190b; 
+}
