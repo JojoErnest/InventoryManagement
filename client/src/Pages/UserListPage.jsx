@@ -13,6 +13,9 @@ const UserListPage = ({ user, onLogout, onRegister}) => {
   const [regPhone, setRegPhone] = useState("");
   const [regRole, setRegRole] = useState(2); 
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
   const API = "http://localhost:5243";
@@ -24,6 +27,57 @@ const UserListPage = ({ user, onLogout, onRegister}) => {
       setRegUsername("");
       setRegPassword("");
     };
+
+    const handleEdit = (user) => {
+      setSelectedUser(user);   
+      setIsEditModalOpen(true); 
+    };
+
+    const handleSaveEdit = async () => {
+      try {
+        const response = await fetch(`${API}/api/user/${selectedUser.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...selectedUser,
+            updatedBy: user?.username 
+          })
+        });
+
+
+
+        if (response.ok) {
+          setUsers(users.map(u => u.id === selectedUser.id ? selectedUser : u));
+          setIsEditModalOpen(false);
+          alert("User berhasil diupdate!");
+        } else {
+          alert("Gagal update user");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Terjadi error saat update user");
+      }
+    };
+
+    const handleDelete = async (id) => {
+    if (!window.confirm("Yakin mau hapus user ini?")) return;
+
+    try {
+      const response = await fetch(`${API}/api/user/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setUsers(users.filter(user => user.id !== id));
+        alert("User berhasil dihapus!");
+      } else {
+        alert("Gagal menghapus user");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Terjadi error saat menghapus user");
+    }
+  };
 
     const handleRegisterSubmit = (e) => {
       e.preventDefault();
@@ -96,8 +150,22 @@ const UserListPage = ({ user, onLogout, onRegister}) => {
                   <td>{index + 1}</td>
                   <td>{user.username}</td>
                   <td>{user.email}</td>
-                  <td className={user.role === 0 ? "admin-role" : "user-role"}>
-                    {user.role === 0 ? "Admin" : "User"}
+                  <td className={user.role === 0 ? "admin-role" : user.role === 1 ? "manager-role" : "user-role"}>
+                    {user.role === 0 ? "Admin" : user.role === 1 ? "Manager": "User"}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleEdit(user)}
+                      className="btn-edit"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.id)}
+                      className="btn-delete"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -125,6 +193,50 @@ const UserListPage = ({ user, onLogout, onRegister}) => {
           onSubmit={handleRegisterSubmit}
         />
       )}
+
+      {/* Edit Modal */}
+      {isEditModalOpen && selectedUser && (
+      <div className="modal-backdrop">
+        <div className="modal">
+          <h2>Edit User</h2>
+          <label>Username</label>
+          <input
+            type="text"
+            value={selectedUser.username}
+            onChange={(e) =>
+              setSelectedUser({ ...selectedUser, username: e.target.value })
+            }
+          />
+
+          <label>Email</label>
+          <input
+            type="email"
+            value={selectedUser.email}
+            onChange={(e) =>
+              setSelectedUser({ ...selectedUser, email: e.target.value })
+            }
+          />
+
+          <label>Role</label>
+          <select
+            value={selectedUser.role}
+            onChange={(e) =>
+              setSelectedUser({ ...selectedUser, role: parseInt(e.target.value) })
+            }
+          >
+            <option value={0}>Admin</option>
+            <option value={1}>Manager</option>
+            <option value={2}>User</option>
+          </select>
+
+          <div className="modal-actions">
+            <button onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+            <button onClick={handleSaveEdit}>Save</button>
+          </div>
+        </div>
+      </div>
+    )}
+
     </div>
   );
 };

@@ -51,7 +51,7 @@ namespace server.Controllers
             return Ok(user);
         }
 
-       // DELETE: api/user/5
+        // DELETE: api/user/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id, [FromQuery] string? deletedBy)
         {
@@ -73,6 +73,40 @@ namespace server.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // PUT: api/user/5
+       [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto updatedUser)
+        {
+            if (id != updatedUser.Id) 
+                return BadRequest("User ID mismatch");
+
+            var existingUser = await _context.Users.FindAsync(id);
+            if (existingUser == null) 
+                return NotFound();
+
+            var oldData = JsonSerializer.Serialize(existingUser);
+
+            existingUser.Username = updatedUser.Username;
+            existingUser.Email = updatedUser.Email;
+            existingUser.Phone = updatedUser.Phone;
+            existingUser.FullName = updatedUser.FullName;
+            existingUser.Role = (UserRole)updatedUser.Role;
+
+            _context.UserChangeLogs.Add(new UserChangeLog
+            {
+                UserId = id,
+                Action = "Update",
+                OldData = oldData,
+                NewData = JsonSerializer.Serialize(updatedUser),
+                Timestamp = DateTime.UtcNow,
+                ActionsBy = updatedUser.UpdatedBy ?? "Unknown"
+            });
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
 
     }
 }
